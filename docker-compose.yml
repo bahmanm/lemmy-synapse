@@ -1,0 +1,67 @@
+####################################################################################################
+# Copyright (c) 2023 Bahman Movaqar
+#
+# This file is part of lemmy-meter.
+# lemmy-meter is free software: you can redistribute it and/or modify it under the terms of the GNU
+# General Public License as published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# lemmy-meter is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with lemmy-meter.
+# If not, see <https://www.gnu.org/licenses/>.
+####################################################################################################
+
+--- 
+version: "3.8"
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.47.2
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"      
+    ports:
+      - "9090:9090"
+    volumes:
+      - "./cluster/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "prometheus-data:/prometheus"
+    networks:
+      - lemmy
+    restart: always
+
+  grafana:
+    image: grafana/grafana:10.1.5
+    volumes:
+      - "grafana-data:/var/lib/grafana"
+    ports:
+      - "3000:3000"
+    networks:
+      - lemmy      
+    restart: always
+
+  node-exporter:
+    image: prom/node-exporter:v1.6.1
+    command:
+      - "--path.rootfs=/host"
+    ports:
+      - "9100:9100"
+    volumes:
+      - "/:/host:ro,rslave"
+    networks:
+      - lemmy
+    pid: host
+    restart: always
+
+volumes:
+  prometheus-data:
+  grafana-data:    
+
+networks:
+  lemmy:
+    name: lemmycafe_default 
+    external: true
+    
