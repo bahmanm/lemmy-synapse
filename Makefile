@@ -21,10 +21,15 @@ SHELL := /usr/bin/env -S bash -o pipefail
 export NAME := lemmy-synapse
 export ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
+ifeq ($(POSTGRESQL_PASSWORD),)
+$(error Provide a value for variable POSTGRESQL_PASSWORD)
+endif
+
 ####################################################################################################
 
 define docker-compose
-docker compose \
+export POSTGRESQL_PASSWORD \
+&& docker compose \
 	--file $(ROOT)docker-compose.yml \
 	--project-name $(NAME)
 endef

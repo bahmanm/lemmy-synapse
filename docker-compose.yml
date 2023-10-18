@@ -14,7 +14,7 @@
 # If not, see <https://www.gnu.org/licenses/>.
 ####################################################################################################
 
---- 
+---
 version: "3.8"
 
 services:
@@ -23,7 +23,7 @@ services:
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
-      - "--storage.tsdb.retention.time=30d"      
+      - "--storage.tsdb.retention.time=30d"
     ports:
       - "9090:9090"
     volumes:
@@ -40,7 +40,7 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - lemmy      
+      - lemmy
     restart: always
 
   node-exporter:
@@ -56,12 +56,23 @@ services:
     pid: host
     restart: always
 
+  postgresql-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.14.0
+    command:
+      - "--log.level=debug"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://postgres_exporter:${POSTGRESQL_PASSWORD}@10.20.0.2:5000/postgres?sslmode=disable
+    ports:
+      - "9187:9187"
+    networks:
+      - lemmy
+    restart: always
+
 volumes:
   prometheus-data:
-  grafana-data:    
+  grafana-data:
 
 networks:
   lemmy:
-    name: lemmycafe_default 
+    name: lemmycafe_default
     external: true
-    
