@@ -14,25 +14,15 @@
 # If not, see <https://www.gnu.org/licenses/>.
 ####################################################################################################
 
----
-global:
-  scrape_interval: 1m
+bin.srcdir := $(src.dir)bin
 
-scrape_configs:
-  - job_name: 'prometheus'
-    scrape_interval: 1m
-    static_configs:
-      - targets:
-          - localhost:9090
+####################################################################################################
 
-  - job_name: 'node-exporter'
-    scrape_interval: 1m
-    static_configs:
-      - targets:
-          - node-exporter:9100
+.PHONY : bin.package
 
-  - job_name: 'postgresql-exporter'
-    scrape_interval: 1m
-    static_configs:
-      - targets:
-          - postgresql-exporter:9187
+bin.package :
+	tar \
+		-C $(bin.srcdir) \
+		--append \
+		--file=$(lemmy-synapse.archive) \
+		lemmy-synapse
