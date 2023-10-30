@@ -35,7 +35,7 @@ services:
     restart: always
 
   grafana:
-    image: grafana/grafana:10.1.5
+    image: grafana/grafana:10.2.0
     volumes:
       - "grafana-data:/var/lib/grafana"
     ports:
@@ -57,8 +57,9 @@ services:
     restart: always
 
   postgresql-exporter:
-    image: prometheuscommunity/postgres-exporter:v0.14.0
-    command: "${PG_EXPORTER_OPTIONS}"
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    command:
+      - "--log.level=debug"
     environment:
       - DATA_SOURCE_NAME=${PG_EXPORTER_DATA_SOURCE_NAME}
     ports:
