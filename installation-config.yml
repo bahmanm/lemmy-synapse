@@ -1,0 +1,32 @@
+---
+####################################################################################################
+# Installation directory
+####################################################################################################
+
+lemmy_synapse_installation_directory: "/tmp/lemmy-synapse"
+
+####################################################################################################
+# PostgreSQL connection information
+####################################################################################################
+
+postgres_hostname: "localhost"
+postgres_port: 5432
+postgres_admin_user: "lemmy"
+postgres_admin_password: "DHMvr6iU1GRa8zorP2ef"
+postgres_service_name: "postgres"
+
+####################################################################################################
+# PostgreSQL user that should be created/used for lemmy-synapse and its password.
+####################################################################################################
+
+lemmy_synapse_postgres_user: "lemmy_synapse"
+lemmy_synapse_postgres_password: "lemmy_synapse"
+
+####################################################################################################
+# Lemmy Docker network name
+#
+# If you have a customised Lemmy insatllation, make sure you double check the value by  running
+# `docker network ls'.
+####################################################################################################
+
+lemmy_network: "lemmylocal_default"

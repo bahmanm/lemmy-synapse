@@ -14,25 +14,19 @@
 # If not, see <https://www.gnu.org/licenses/>.
 ####################################################################################################
 
----
-global:
-  scrape_interval: 1m
+cluster.srcdir := $(src.dir)cluster/
 
-scrape_configs:
-  - job_name: 'prometheus'
-    scrape_interval: 1m
-    static_configs:
-      - targets:
-          - localhost:9090
+####################################################################################################
 
-  - job_name: 'node-exporter'
-    scrape_interval: 1m
-    static_configs:
-      - targets:
-          - node-exporter:9100
+.PHONY : cluster.package
 
-  - job_name: 'postgresql-exporter'
-    scrape_interval: 1m
-    static_configs:
-      - targets:
-          - postgresql-exporter:9187
+cluster.package :
+	tar \
+		-C $(cluster.srcdir) \
+		--append \
+		--transform='s#^.##' \
+		--exclude='Makefile' \
+		--exclude='*~*' \
+		--exclude='*#*' \
+		--file=$(lemmy-synapse.archive) \
+		.

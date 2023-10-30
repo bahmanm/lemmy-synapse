@@ -1,16 +1,16 @@
 ####################################################################################################
 # Copyright (c) 2023 Bahman Movaqar
 #
-# This file is part of lemmy-meter.
-# lemmy-meter is free software: you can redistribute it and/or modify it under the terms of the GNU
+# This file is part of lemmy-synapse.
+# lemmy-synapse is free software: you can redistribute it and/or modify it under the terms of the GNU
 # General Public License as published by the Free Software Foundation, either version 3 of the
 # License, or (at your option) any later version.
 #
-# lemmy-meter is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+# lemmy-synapse is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License along with lemmy-meter.
+# You should have received a copy of the GNU General Public License along with lemmy-synapse.
 # If not, see <https://www.gnu.org/licenses/>.
 ####################################################################################################
 
@@ -24,10 +24,11 @@ services:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
       - "--storage.tsdb.retention.time=30d"
+      - "--log.level=debug"
     ports:
       - "9090:9090"
     volumes:
-      - "./cluster/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
       - "prometheus-data:/prometheus"
     networks:
       - lemmy
@@ -45,8 +46,7 @@ services:
 
   node-exporter:
     image: prom/node-exporter:v1.6.1
-    command:
-      - "--path.rootfs=/host"
+    command: "${NODE_EXPORTER_OPTIONS}"
     ports:
       - "9100:9100"
     volumes:
@@ -61,7 +61,7 @@ services:
     command:
       - "--log.level=debug"
     environment:
-      - DATA_SOURCE_NAME=postgresql://postgres_exporter:${POSTGRESQL_PASSWORD}@10.20.0.2:5000/postgres?sslmode=disable
+      - DATA_SOURCE_NAME=${PG_EXPORTER_DATA_SOURCE_NAME}
     ports:
       - "9187:9187"
     networks:
@@ -74,5 +74,5 @@ volumes:
 
 networks:
   lemmy:
-    name: lemmycafe_default
+    name: ${LEMMY_SYNAPSE_NETWORK}
     external: true

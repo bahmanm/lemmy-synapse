@@ -1,3 +1,6 @@
+#!/usr/bin/env -S make -j 1 -k -f
+# -*- mode: makefile-gmake; -*-
+
 ####################################################################################################
 # Copyright (c) 2023 Bahman Movaqar
 #
@@ -16,59 +19,45 @@
 
 SHELL := /usr/bin/env -S bash -o pipefail
 
-.DEFAULT_GOAL := install
+.DEFAULT_GOAL := help
 
-export NAME := lemmy-synapse
-export ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-export src.dir := $(ROOT)
-export build.dir := $(ROOT)_build/
-lemmy-synapse.archive := $(build.dir)$(NAME).tar
+name := lemmy-synapse
+root := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+confs := $(shell find $(root) -type f -name '*.conf')
 
 ####################################################################################################
 
-.PHONY : bmakelib/bmakelib.mk
-include bmakelib/bmakelib.mk
+.PHONY : help
 
-.PHONY : $(src.dir)cluster/Makefile
-include $(src.dir)cluster/Makefile
-
-.PHONY : $(src.dir)ansible/Makefile
-include $(src.dir)ansible/Makefile
-
-.PHONY : $(src.dir)bin/Makefile
-include $(src.dir)bin/Makefile
-
+help :
+	@echo USAGE: lemmy-synapse COMMAND \
+	&& echo \
+	&& echo COMMAND can be either "up" or "down". \
+	&& echo
 
 ####################################################################################################
 
-$(build.dir) :
-	mkdir -p $(@)
+define docker-compose
+	docker compose \
+		--file $(root)docker-compose.yml \
+		--project-name $(name) \
+		$(confs:%=--env-file=%)
+endef
 
 ####################################################################################################
 
-.PHONY : $(lemmy-synapse.archive)
+.PHONY : up
 
-$(lemmy-synapse.archive) : | $(build.dir)
-	tar --create --file $(@) -T /dev/null
-
-####################################################################################################
-
-.PHONY : package
-
-package : $(lemmy-synapse.archive) cluster.package bin.package
+up :
+	$(docker-compose) up \
+		--pull always \
+		--remove-orphans \
+		--detach
 
 ####################################################################################################
 
-.PHONY : clean
+.PHONY : down
 
-clean :
-	-rm -rf $(build.dir)
-
-####################################################################################################
-
-.PHONY : install
-
-install : clean package
-install : ansible.lemmy-synapse-archive := $(lemmy-synapse.archive)
-install : ansible.lemmy-synapse-dashboards := $(cluster.srcdir)grafana/dashboards
-install : $(ansible.playbook.install)
+down :
+	$(docker-compose) down \
+		--remove-orphans
