@@ -81,7 +81,7 @@ modifying `docker-compose.yml`, so that the `postgres` block looks like this:
 
 ### 2.1.3 bmakelib
 
-[bmakelib](/bahmanm/bmakelib) is a library which I've used to write cleaner make files.  Please follow the [installation steps](/bahmanm/bmakelib#how-to-install) to, well, install it.
+[bmakelib](https://github.com/bahmanm/bmakelib) is a library which I've used to write cleaner make files.  Please follow the [installation steps](https://github.com/bahmanm/bmakelib#how-to-install) to, well, install it.
 
 ## 2.2 What You Need To Know
 
