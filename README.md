@@ -131,7 +131,8 @@ Once the installation is done, Grafana (which is the metrics visualisation and r
 tool) should be running and ready to accept connections on port `3000`.
 
 One simple and secure way to access it is via SSH port forwarding.  For example, assuming
-you've run the following command, you can access Grafana at http://localhost:3000
+you've run the following command, you can access Grafana at http://localhost:3000 with
+user `admin` and password `admin`.
 
 ```text
 ssh -L3000:localhost:3000 <YOUR_INSTANCE>
