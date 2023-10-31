@@ -79,6 +79,10 @@ modifying `docker-compose.yml`, so that the `postgres` block looks like this:
 ...    
 ```
 
+### 2.1.3 bmakelib
+
+[bmakelib](/bahmanm/bmakelib) is a library which I've used to write cleaner make files.  Please follow the [installation steps](/bahmanm/bmakelib#how-to-install) to, well, install it.
+
 ## 2.2 What You Need To Know
 
 ### 2.2.1 Docker Network 
@@ -108,3 +112,24 @@ perl -nal -F':\s*' -E 'say $F[1] if $F[0] =~ /password/' < lemmy.hjson
 
 The last step is to review the information in `installation-config.yml` and fill in the
 blanks. 
+
+## 2.4 Install It Already!
+
+Installing lemmy-synapse is, hopefully, just a one-liner:
+
+```text
+make ansible.lemmy-synapse-server=<YOUR_INSTANCE> install
+```
+
+# 3. How To Use
+
+Once the installation is done, Grafana (which is the metrics visualisation and reporting
+tool) should be running and ready to accept connections on port `3000`.
+
+One simple and secure way to access it is via SSH port forwarding.  For example, assuming
+you've run the following command, you can access Grafana at http://localhost:3000
+
+```text
+ssh -L3000:localhost:3000 <YOUR_INSTANCE>
+```
+
