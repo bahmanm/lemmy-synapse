@@ -2,17 +2,17 @@
 
 # Lemmy Docker network for lemmy-synapse to attach to.
 # See README 2.2.1 (https://github.com/bahmanm/lemmy-synapse#221-docker-network)
-lemmy_network: ""
+lemmy_network: "lemmylocal_default"
 
 # PostgreSQL admin user and password.
 # Will be used only during installation to create a special user to scrape the metrics.
 # See README 2.2.2 (https://github.com/bahmanm/lemmy-synapse#221-docker-network)
 postgres_admin_user: "lemmy"
-postgres_admin_password: ""
+postgres_admin_password: "DHMvr6iU1GRa8zorP2ef"
 
 # What should be the name of lemmy-synapse PostgreSQL user and its password.
 lemmy_synapse_postgres_user: "lemmy_synapse"
-lemmy_synapse_postgres_password: ""
+lemmy_synapse_postgres_password: "lemmy_synapse"
 
 # Installation directory. It will be created if it doesn't exist.
 lemmy_synapse_installation_directory: "/opt/lemmy-synapse"
@@ -25,7 +25,7 @@ postgres_port: 5432
 # DO NOT TOUCH unless you know what you're doing.
 # PostgreSQL host name used at runtime.
 #  - If you're running PG as a separate systemd service, use `localhost'.
-#  - If you're running PG in a the same Docker network as lemmy-synapse,
+#  - If you're running PG in the same Docker network as lemmy-synapse,
 #    use the Docker compose "service" name.
 #  - If you're running PG on a different host, use the hostname.
 postgres_service_name: "postgres"

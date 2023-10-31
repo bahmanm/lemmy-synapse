@@ -24,25 +24,25 @@
 
     - name: Copy lemmy-synapse to the remote host
       block:
-        - name: Ensure installation directory exists
+        - name: "[Copy lemmy-synapse] Ensure installation directory exists"
           ansible.builtin.file:
             path: "{{ lemmy_synapse_installation_directory }}"
             state: directory
 
-        - name: Extract lemmy-synapse archive
+        - name: "[Copy lemmy-synapse] Extract lemmy-synapse archive"
           ansible.builtin.unarchive:
             src: "{{ lemmy_synapse_archive_path }}"
             dest: "{{ lemmy_synapse_installation_directory }}"
 
     - name: PostgreSQL user setup (same cluster as Lemmy)
       block:
-        - name: Install PostgreSQL driver
+        - name: "[PostgreSQL user setup] Install PostgreSQL driver"
           ansible.builtin.apt:
             name: python3-psycopg2
             state: present
             update_cache: true
 
-        - name: Create the user
+        - name: "[PostgreSQL user setup] Create the user"
           community.postgresql.postgresql_user:
             login_host: "{{ postgres_hostname }}"
             login_port: "{{ postgres_port }}"
@@ -54,7 +54,7 @@
 
             state: present
 
-        - name: Configure the user
+        - name: "[PostgreSQL user setup] Configure the user"
           community.postgresql.postgresql_membership:
             login_host: "{{ postgres_hostname }}"
             login_port: "{{ postgres_port }}"
@@ -70,7 +70,7 @@
 
     - name: Populate lemmy-synapse configuration
       block:
-        - name: postgres-exporter DATA_SOURCE_NAME
+        - name: "[lemmy-synapse configuration] postgres-exporter DATA_SOURCE_NAME"
           ansible.builtin.lineinfile:
             path: "{{ lemmy_synapse_installation_directory }}/postgres-exporter/postgres-exporter.conf"
 
@@ -83,7 +83,7 @@
             create: true
             state: present
 
-        - name: lemmy-synapse LEMMY_SYNAPSE_NETWORK
+        - name: "[lemmy-synapse configuration] lemmy-synapse LEMMY_SYNAPSE_NETWORK"
           ansible.builtin.lineinfile:
             path: "{{ lemmy_synapse_installation_directory }}/lemmy-synapse.conf"
 
@@ -94,16 +94,25 @@
             create: true
             state: present
 
-    - name: Start lemmy-synapse cluster
-      ansible.builtin.command:
-        cmd: >-
-          {{ lemmy_synapse_installation_directory }}/lemmy-synapse up
-      register: _result
-      changed_when: _result is success
+    - name: Restart lemmy-synapse cluster
+      block:
+        - name: "[Restart lemmy-synapse] Shut down the cluster"
+          ansible.builtin.command:
+            cmd: >-
+              {{ lemmy_synapse_installation_directory }}/lemmy-synapse down
+          register: _result
+          changed_when: _result is success
+
+        - name: "[Restart lemmy-synapse] Start the cluster"
+          ansible.builtin.command:
+            cmd: >-
+              {{ lemmy_synapse_installation_directory }}/lemmy-synapse up
+          register: _result
+          changed_when: _result is success
 
     - name: Setup Grafana
       block:
-        - name: Add Prometheus datasource
+        - name: "[Setup Grafana] Add Prometheus datasource"
           community.grafana.grafana_datasource:
             grafana_url: "http://localhost:3000"
             grafana_user: "admin"
@@ -115,19 +124,19 @@
             uid: "be4998e0-8b84-4ac5-acfd-ec80a1ac6cba"
             is_default: true
             state: present
-          retries: 5
-          delay: 10
+          retries: 24
+          delay: 5
           register: _result
           until: _result is success
 
         - name: Import stock node-exporter dashboard
           block:
-            - name: Copy stock node-exporter dashboard to remote machine
+            - name: "[Setup Grafana] Copy stock node-exporter dashboard to remote machine"
               ansible.builtin.copy:
                 src: "{{ lemmy_synapse_dashboards_path }}/node-exporter-full.json"
                 dest: /tmp/node-exporter-full.json
 
-            - name: Import stock node-exporter dashboard
+            - name: "[Setup Grafana] Import stock node-exporter dashboard"
               ignore_errors: true
               community.grafana.grafana_dashboard:
                 grafana_url: "http://localhost:3000"
@@ -140,12 +149,30 @@
 
         - name: Import stock postgres-exporter dashboard
           block:
-            - name: Copy stock postgresql-exporter dashboard to remote machine
+            - name: "[Setup Grafana] Copy Host Stats dashboard to remote machine"
+              ansible.builtin.copy:
+                src: "{{ lemmy_synapse_dashboards_path }}/node-exporter-full.json"
+                dest: /tmp/node-exporter-full.json
+
+            - name: "[Setup Grafana] Import Host Stats dashboard"
+              ignore_errors: true
+              community.grafana.grafana_dashboard:
+                grafana_url: "http://localhost:3000"
+                grafana_user: "admin"
+                grafana_password: "admin"
+                org_id: "1"
+                path: /tmp/node-exporter-full.json
+                overwrite: true
+                state: present
+
+        - name: Import PostgreSQL Stats dashboard
+          block:
+            - name: "[Setup Grafana] Copy PostgreSQL Stats dashboard to remote machine"
               ansible.builtin.copy:
                 src: "{{ lemmy_synapse_dashboards_path }}/postgresql-exporter.json"
                 dest: /tmp/postgresql-exporter.json
 
-            - name: Import stock postgres-exporter dashboard
+            - name: "[Setup Grafana] Import PostgreSQL Stats dashboard"
               ignore_errors: true
               community.grafana.grafana_dashboard:
                 grafana_url: "http://localhost:3000"
@@ -153,6 +180,24 @@
                 grafana_password: "admin"
                 org_id: "1"
                 path: /tmp/postgresql-exporter.json
+                overwrite: true
+                state: present
+
+        - name: Import Docker Stats dashboard
+          block:
+            - name: "[Setup Grafana] Copy Docker Stats dashboard to remote machine"
+              ansible.builtin.copy:
+                src: "{{ lemmy_synapse_dashboards_path }}/docker-cadvisor.json"
+                dest: /tmp/docker-cadvisor.json
+
+            - name: "[Setup Grafana] Import Docker Stats dashboard"
+              ignore_errors: true
+              community.grafana.grafana_dashboard:
+                grafana_url: "http://localhost:3000"
+                grafana_user: "admin"
+                grafana_password: "admin"
+                org_id: "1"
+                path: /tmp/docker-cadvisor.json
                 overwrite: true
                 state: present
 

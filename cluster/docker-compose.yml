@@ -36,10 +36,10 @@ services:
 
   grafana:
     image: grafana/grafana:10.2.0
-    volumes:
-      - "grafana-data:/var/lib/grafana"
     ports:
       - "3000:3000"
+    volumes:
+      - "grafana-data:/var/lib/grafana"
     networks:
       - lemmy
     restart: always
@@ -68,9 +68,42 @@ services:
       - lemmy
     restart: always
 
+  redis:
+    image: redis:7.2.2
+    command:
+      - "redis-server"
+      - "--save 60 1"
+      - "--loglevel warning"
+    ports:
+      - "6379:6379"
+    volumes:
+      - "redis-data:/data"
+    networks:
+      - lemmy
+    restart: always
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    ports:
+      - "9199:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    privileged: true
+    depends_on:
+      - redis
+    networks:
+      - lemmy
+    restart: always
+
 volumes:
   prometheus-data:
   grafana-data:
+  redis-data:
 
 networks:
   lemmy:

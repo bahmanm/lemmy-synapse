@@ -28,6 +28,7 @@ Here are a couple of screenshots for your browsing pleasure:
 
 * [PostgreSQL dashboard](doc/img/pg-stats.png)
 * [Host dashboard](doc/img/host-stats.png)
+* [Docker dashboard](doc/img/docker-stats.png)
 
 # 2. Installation
 
@@ -137,4 +138,3 @@ user `admin` and password `admin`.
 ```text
 ssh -L3000:localhost:3000 <YOUR_INSTANCE>
 ```
-
