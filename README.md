@@ -15,13 +15,13 @@ One of the standard ways in the industry to achieve that is to install an observ
 stack in your cluster that scrapes yours hosts and services for useful information, stores
 them and allows you to query them in various ways.
 
-lemmy-synapse is an attemp to bring that fresh breeze of observability to your instance
+lemmy-synapse is an attempt to bring that fresh breeze of observability to your instance
 with ease.
 
 Once installed, you'd have access to the power of Prometheus and Grafana to massage and
 visualise your instance stats the way you need it.
 
-Additionally, you'd have access to a small number of preconfigured dashboards which you
+Additionally, you'd have access to a small number of pre-configured dashboards which you
 can start using right away.
 
 Here are a couple of screenshots for your browsing pleasure:
@@ -40,4 +40,71 @@ prerequisites and things you should figure out in advance.
 
 Needless to say, you should have SSH access to your server.
 
+### 2.1.2 PostgreSQL Access
 
+To be able to setup lemmy-synapse, your instance PostgreSQL must be accessible from
+outside the Docker network.
+
+One simple way to test it out is to run the following command on your server.
+
+```text
+psql -U lemmy -d lemmy -h localhost
+```
+
+If you see a password prompt, you're good to go.
+
+---
+
+For reason beyond lemmy-synapse, Lemmy's installation repo (aka lemmy-ansible) does not
+expose PG ports to outside of Docker network.  Doing so is easy and only requires
+modifying `docker-compose.yml`, so that the `postgres` block looks like this:
+
+```yaml
+...
+  postgres:
+    image: docker.io/postgres:15-alpine
+    hostname: postgres
+    environment:
+      - POSTGRES_USER=lemmy
+      - POSTGRES_PASSWORD=...
+      - POSTGRES_DB=lemmy
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./volumes/postgres:/var/lib/postgresql/data:Z
+      - ./customPostgresql.conf:/etc/postgresql.conf
+    restart: always
+    command: postgres -c config_file=/etc/postgresql.conf
+    logging: *default-logging
+...    
+```
+
+## 2.2 What You Need To Know
+
+### 2.2.1 Docker Network 
+
+In order to scrape metrics, lemmy-synapse will attach to your instance's Docker network
+and probe its services (namely PostgreSQL.)
+
+To find out the name, you can try the following command:
+
+```text
+docker network ls | perl -nalE 'say $F[1] if $F[1] =~ /(lemmy|_default)/'
+```
+
+### 2.2.2 PostgreSQL Password
+
+lemmy-synapse creates a special PostgreSQL user with very limited permissions.  In order
+to do that you'd need to know the password to the PG admin user (which is `lemmy` unless
+you have manually configured your PG server.)
+
+To find out the password you can run the following command:
+
+```text
+perl -nal -F':\s*' -E 'say $F[1] if $F[0] =~ /password/' < lemmy.hjson
+```
+
+## 2.3 Review and Edit The Configuration
+
+The last step is to review the information in `installation-config.yml` and fill in the
+blanks. 
