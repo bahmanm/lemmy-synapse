@@ -81,7 +81,11 @@ modifying `docker-compose.yml`, so that the `postgres` block looks like this:
 
 ### 2.1.3 bmakelib
 
-[bmakelib](https://github.com/bahmanm/bmakelib) is a library which I've used to write cleaner make files.  Please follow the [installation steps](https://github.com/bahmanm/bmakelib#how-to-install) to, well, install it.
+[bmakelib](https://github.com/bahmanm/bmakelib) is a library that I wrote and maintain to
+help me write cleaner make files (yes, I'm a big fan of GNU Make 😁).
+
+Please follow the [installation steps](https://github.com/bahmanm/bmakelib#how-to-install)
+to, well, install it.
 
 ## 2.2 What You Need To Know
 
@@ -105,7 +109,7 @@ you have manually configured your PG server.)
 To find out the password you can run the following command:
 
 ```text
-perl -nal -F':\s*' -E 'say $F[1] if $F[0] =~ /password/' < lemmy.hjson
+hjson-cli -c lemmy.hjson | jq -r '.database.password'
 ```
 
 ## 2.3 Review and Edit The Configuration
