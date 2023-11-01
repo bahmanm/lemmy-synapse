@@ -129,24 +129,6 @@
           register: _result
           until: _result is success
 
-        - name: Import stock node-exporter dashboard
-          block:
-            - name: "[Setup Grafana] Copy stock node-exporter dashboard to remote machine"
-              ansible.builtin.copy:
-                src: "{{ lemmy_synapse_dashboards_path }}/node-exporter-full.json"
-                dest: /tmp/node-exporter-full.json
-
-            - name: "[Setup Grafana] Import stock node-exporter dashboard"
-              ignore_errors: true
-              community.grafana.grafana_dashboard:
-                grafana_url: "http://localhost:3000"
-                grafana_user: "admin"
-                grafana_password: "admin"
-                org_id: "1"
-                path: /tmp/node-exporter-full.json
-                overwrite: true
-                state: present
-
         - name: Import stock postgres-exporter dashboard
           block:
             - name: "[Setup Grafana] Copy Host Stats dashboard to remote machine"
