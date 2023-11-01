@@ -24,7 +24,7 @@ visualise your instance stats the way you need it.
 Additionally, you'd have access to a small number of pre-configured dashboards which you
 can start using right away.
 
-Here are a couple of screenshots for your browsing pleasure:
+📸 Here are a couple of screenshots for your browsing pleasure:
 
 * [PostgreSQL dashboard](doc/img/pg-stats.png)
 * [Host dashboard](doc/img/host-stats.png)
@@ -39,7 +39,7 @@ prerequisites and things you should figure out in advance.
 
 ### 2.1.1 SSH Access
 
-Needless to say, you should have SSH access to your server.
+Needless to say, you must have SSH access to your server.
 
 ### 2.1.2 PostgreSQL Access
 
@@ -138,3 +138,5 @@ user `admin` and password `admin`.
 ```text
 ssh -L3000:localhost:3000 <YOUR_INSTANCE>
 ```
+
+Happy monitoring!
