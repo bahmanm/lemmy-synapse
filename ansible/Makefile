@@ -46,6 +46,7 @@ $(ansible.playbook.install.requirements) : | $(ansible.venv)
 $(ansible.playbook.install) : bmakelib.error-if-blank( ansible.lemmy-synapse-archive )
 $(ansible.playbook.install) : bmakelib.error-if-blank( ansible.lemmy-synapse-server )
 $(ansible.playbook.install) : bmakelib.error-if-blank( ansible.user )
+$(ansible.playbook.install) : bmakelib.default-if-blank( ansible.password-auth,no )
 $(ansible.playbook.install) : bmakelib.default-if-blank( ansible.verbosity, )
 $(ansible.playbook.install) : bmakelib.error-if-blank( ansible.lemmy-synapse-dashboards )
 $(ansible.playbook.install) : $(ansible.playbook.install.requirements)
@@ -58,6 +59,10 @@ $(ansible.playbook.install) : | $(ansible.venv)
 		-e 'lemmy_synapse_installation_config_path=$(src.dir)installation-config.yml' \
 		-e 'lemmy_synapse_dashboards_path=$(ansible.lemmy-synapse-dashboards)' \
 		-e 'ansible_user=$(ansible.user)' \
+		$(if \
+			$(filter yes,$(ansible.password-auth)), \
+			--ask-pass, \
+		) \
 		--become \
 		--ask-become-pass \
 		$(@)
