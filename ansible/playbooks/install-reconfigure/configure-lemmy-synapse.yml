@@ -37,10 +37,9 @@
     - name: PostgreSQL user setup (same cluster as Lemmy)
       block:
         - name: "[PostgreSQL user setup] Install PostgreSQL driver"
-          ansible.builtin.apt:
+          ansible.builtin.package:
             name: python3-psycopg2
             state: present
-            update_cache: true
 
         - name: "[PostgreSQL user setup] Create the user"
           community.postgresql.postgresql_user:
