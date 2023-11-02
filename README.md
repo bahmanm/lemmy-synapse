@@ -126,7 +126,7 @@ Installing lemmy-synapse is, hopefully, just a one-liner:
 make ansible.lemmy-synapse-server=<YOUR_INSTANCE> install
 ```
 
-_💡 During the installation, Ansible will pause with a "BECOME
+💡 _During the installation, Ansible will pause with a "BECOME
 password" prompt.  That's simply the Ansible way of asking for the
 sudo password on the remote machine._
 
