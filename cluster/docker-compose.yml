@@ -26,7 +26,7 @@ services:
       - "--storage.tsdb.retention.time=30d"
       - "--log.level=debug"
     ports:
-      - "9090:9090"
+      - "9090"
     volumes:
       - "./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
       - "prometheus-data:/prometheus"
@@ -48,7 +48,7 @@ services:
     image: prom/node-exporter:v1.6.1
     command: "${NODE_EXPORTER_OPTIONS}"
     ports:
-      - "9100:9100"
+      - "9100"
     volumes:
       - "/:/host:ro,rslave"
     networks:
@@ -63,7 +63,7 @@ services:
     environment:
       - DATA_SOURCE_NAME=${PG_EXPORTER_DATA_SOURCE_NAME}
     ports:
-      - "9187:9187"
+      - "9187"
     networks:
       - lemmy
     restart: always
@@ -75,7 +75,7 @@ services:
       - "--save 60 1"
       - "--loglevel warning"
     ports:
-      - "6379:6379"
+      - "6379"
     volumes:
       - "redis-data:/data"
     networks:
@@ -85,7 +85,7 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.2
     ports:
-      - "9199:8080"
+      - "8080"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
