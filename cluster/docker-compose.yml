@@ -69,7 +69,7 @@ services:
     restart: always
 
   redis:
-    image: redis:7.2.2
+    image: redis:7.2.3
     command:
       - "redis-server"
       - "--save 60 1"
