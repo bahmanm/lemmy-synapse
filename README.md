@@ -96,6 +96,19 @@ help me write cleaner make files (yes, I'm a big fan of GNU Make 😁).
 Please follow the [installation steps](https://github.com/bahmanm/bmakelib#how-to-install)
 to, well, install it.
 
+### 2.1.4 GNU tar
+
+**MacOS Only**
+
+The installation process uses GNU tar to package lemmy-synapse.  If
+you're using Homebrew, simply install [`gnu-tar` formula](https://formulae.brew.sh/formula/gnu-tar).
+
+Don't forget to run the following in your terminal so that GNU tar becomes the active tar application.
+
+```
+export PATH="$HOMEBREW_PREFIX/opt/gnu-tar/libexec/gnubin:$PATH"
+```
+
 ## 2.2 What You Need To Know
 
 ### 2.2.1 Docker Network 
@@ -130,9 +143,29 @@ blanks.
 
 Installing lemmy-synapse is, hopefully, just a one-liner:
 
+**Linux**
+
 ```text
-make ansible.lemmy-synapse-server=<YOUR_INSTANCE> install
+make \
+    ansible.user=<REMOTE_USER> \
+    ansible.password-auth=no \
+    ansible.lemmy-synapse-server=<YOUR_INSTANCE> \
+    install
 ```
+
+**MacOS**
+
+```text
+make \
+    -I"$HOMEBREW_PREFIX/include" \
+    ansible.user=<REMOTE_USER> \
+    ansible.password-auth=no \
+    ansible.lemmy-synapse-server=<YOUR_INSTANCE> \
+    install
+```
+
+💡 _If you're using SSH password authentication, make sure you set
+`ansible.password-auth=yes` when calling Make._
 
 💡 _During the installation, Ansible will pause with a "BECOME
 password" prompt.  That's simply the Ansible way of asking for the
