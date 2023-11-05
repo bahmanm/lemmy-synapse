@@ -30,6 +30,14 @@ can start using right away.
 * [Host dashboard](doc/img/host-stats.png)
 * [Docker dashboard](doc/img/docker-stats.png)
 
+## 1.1 CPU and RAM Requirements
+
+Based on the data from a handful of live lemmy-synapse installations:
+
+* It occupies a steady amount of 300-340MB of RAM.
+* CPU usage is almost always negligible and stays below 3-4% of a
+  single core.
+
 # 2. Installation
 
 Great!  You have decided to give lemmy-synapse a shot.  There are only a couple of
