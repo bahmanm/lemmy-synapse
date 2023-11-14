@@ -45,7 +45,7 @@ services:
     restart: always
 
   node-exporter:
-    image: prom/node-exporter:v1.6.1
+    image: prom/node-exporter:v1.7.0
     command: "${NODE_EXPORTER_OPTIONS}"
     ports:
       - "9100"
