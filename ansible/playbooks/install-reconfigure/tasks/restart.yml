@@ -16,7 +16,21 @@
 
 ---
 
-collections:
-  - name: community.postgresql
-  - name: community.grafana
-  - name: community.docker
+- name: "restart ➤➤➤ Ensure variables are set"
+  ansible.builtin.assert:
+    that:
+      - lemmy_synapse_installation_directory
+
+- name: "restart ➤➤➤ Shut down the cluster"
+  ansible.builtin.command:
+    cmd: >-
+      {{ lemmy_synapse_installation_directory }}/lemmy-synapse down
+  register: _result
+  changed_when: _result is success
+
+- name: "restart ➤➤➤ Start the cluster"
+  ansible.builtin.command:
+    cmd: >-
+      {{ lemmy_synapse_installation_directory }}/lemmy-synapse up
+  register: _result
+  changed_when: _result is success

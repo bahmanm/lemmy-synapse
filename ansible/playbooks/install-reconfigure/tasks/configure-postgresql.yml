@@ -1,0 +1,58 @@
+####################################################################################################
+# Copyright (c) 2023 Bahman Movaqar
+#
+# This file is part of lemmy-synapse.
+# lemmy-synapse is free software: you can redistribute it and/or modify it under the terms of the GNU
+# General Public License as published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# lemmy-synapse is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with lemmy-synapse.
+# If not, see <https://www.gnu.org/licenses/>.
+####################################################################################################
+
+---
+
+- name: "configure-postgresql ➤➤➤ Ensure variables are set"
+  ansible.builtin.assert:
+    that:
+      - postgres_hostname
+      - postgres_port
+      - postgres_admin_user
+      - postgres_admin_password
+      - lemmy_synapse_postgres_user
+      - lemmy_synapse_postgres_password
+
+- name: "configure-postgresql ➤➤➤ Install PostgreSQL driver"
+  ansible.builtin.package:
+    name: python3-psycopg2
+    state: present
+
+- name: "configure-postgresql ➤➤➤ Create the user"
+  community.postgresql.postgresql_user:
+    login_host: "{{ postgres_hostname }}"
+    login_port: "{{ postgres_port }}"
+    login_user: "{{ postgres_admin_user}}"
+    login_password: "{{ postgres_admin_password }}"
+
+    name: "{{ lemmy_synapse_postgres_user }}"
+    password: "{{ lemmy_synapse_postgres_password }}"
+
+    state: present
+
+- name: "configure-postgresql ➤➤➤ Configure the user"
+  community.postgresql.postgresql_membership:
+    login_host: "{{ postgres_hostname }}"
+    login_port: "{{ postgres_port }}"
+    login_user: "{{ postgres_admin_user}}"
+    login_password: "{{ postgres_admin_password }}"
+
+    source_roles:
+      - pg_monitor
+    target_roles:
+      - "{{ lemmy_synapse_postgres_user }}"
+
+    state: present

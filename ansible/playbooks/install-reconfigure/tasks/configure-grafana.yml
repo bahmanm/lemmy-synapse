@@ -1,0 +1,93 @@
+####################################################################################################
+# Copyright (c) 2023 Bahman Movaqar
+#
+# This file is part of lemmy-synapse.
+# lemmy-synapse is free software: you can redistribute it and/or modify it under the terms of the GNU
+# General Public License as published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# lemmy-synapse is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with lemmy-synapse.
+# If not, see <https://www.gnu.org/licenses/>.
+####################################################################################################
+
+---
+
+- name: "configure-grafana ➤➤➤ Ensure variables are set"
+  ansible.builtin.assert:
+    that:
+      - lemmy_synapse_dashboards_path
+
+- name: "configure-grafana ➤➤➤ Add Prometheus datasource"
+  community.grafana.grafana_datasource:
+    grafana_url: "http://localhost:3000"
+    grafana_user: "admin"
+    grafana_password: "admin"
+    org_id: "1"
+    ds_type: "prometheus"
+    ds_url: "http://prometheus:9090"
+    name: "prometheus.lemmy-synapse"
+    uid: "be4998e0-8b84-4ac5-acfd-ec80a1ac6cba"
+    is_default: true
+    state: present
+  retries: 24
+  delay: 5
+  register: _result
+  until: _result is success
+
+- name: "Import host stats dashboard"
+  block:
+    - name: "configure-grafana ➤➤➤ Copy host stats dashboard to remote machine"
+      ansible.builtin.copy:
+        src: "{{ lemmy_synapse_dashboards_path }}/node-exporter-full.json"
+        dest: /tmp/node-exporter-full.json
+
+    - name: "configure-grafana ➤➤➤ Import host stats dashboard"
+      ignore_errors: true
+      community.grafana.grafana_dashboard:
+        grafana_url: "http://localhost:3000"
+        grafana_user: "admin"
+        grafana_password: "admin"
+        org_id: "1"
+        path: /tmp/node-exporter-full.json
+        overwrite: true
+        state: present
+
+- name: "Import PostgreSQL stats dashboard"
+  block:
+    - name: "configure-grafana ➤➤➤ Copy PostgreSQL stats dashboard to remote machine"
+      ansible.builtin.copy:
+        src: "{{ lemmy_synapse_dashboards_path }}/postgresql-exporter.json"
+        dest: /tmp/postgresql-exporter.json
+
+    - name: "configure-grafana ➤➤➤ Import PostgreSQL stats dashboard"
+      ignore_errors: true
+      community.grafana.grafana_dashboard:
+        grafana_url: "http://localhost:3000"
+        grafana_user: "admin"
+        grafana_password: "admin"
+        org_id: "1"
+        path: /tmp/postgresql-exporter.json
+        overwrite: true
+        state: present
+
+- name: "Import Docker stats dashboard"
+  block:
+    - name: "configure-grafana ➤➤➤ Copy Docker stats dashboard to remote machine"
+      ansible.builtin.copy:
+        src: "{{ lemmy_synapse_dashboards_path }}/docker-cadvisor.json"
+        dest: /tmp/docker-cadvisor.json
+
+    - name: "configure-grafana ➤➤➤ Import Docker stats dashboard"
+      ignore_errors: true
+      community.grafana.grafana_dashboard:
+        grafana_url: "http://localhost:3000"
+        grafana_user: "admin"
+        grafana_password: "admin"
+        org_id: "1"
+        path: /tmp/docker-cadvisor.json
+        overwrite: true
+        state: present
