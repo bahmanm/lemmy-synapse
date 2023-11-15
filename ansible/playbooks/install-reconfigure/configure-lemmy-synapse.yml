@@ -1,4 +1,21 @@
+####################################################################################################
+# Copyright (c) 2023 Bahman Movaqar
+#
+# This file is part of lemmy-synapse.
+# lemmy-synapse is free software: you can redistribute it and/or modify it under the terms of the GNU
+# General Public License as published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# lemmy-synapse is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with lemmy-synapse.
+# If not, see <https://www.gnu.org/licenses/>.
+####################################################################################################
+
 ---
+
 - name: Install and configure lemmy-synapse
   hosts: all
   become: true
@@ -17,6 +34,7 @@
           - postgres_port
           - postgres_admin_user
           - postgres_admin_password
+          - postgres_service_name
           - lemmy_synapse_postgres_user
           - lemmy_synapse_postgres_password
           - lemmy_network
@@ -24,165 +42,33 @@
 
     - name: Copy lemmy-synapse to the remote host
       block:
-        - name: "[Copy lemmy-synapse] Ensure installation directory exists"
+        - name: "copy ➤➤➤ Ensure installation directory exists"
           ansible.builtin.file:
             path: "{{ lemmy_synapse_installation_directory }}"
             state: directory
 
-        - name: "[Copy lemmy-synapse] Extract lemmy-synapse archive"
+        - name: "copy ➤➤➤ Extract lemmy-synapse archive"
           ansible.builtin.unarchive:
             src: "{{ lemmy_synapse_archive_path }}"
             dest: "{{ lemmy_synapse_installation_directory }}"
 
-    - name: PostgreSQL user setup (same cluster as Lemmy)
-      block:
-        - name: "[PostgreSQL user setup] Install PostgreSQL driver"
-          ansible.builtin.package:
-            name: python3-psycopg2
-            state: present
+    - name: "Configure PostgreSQL"
+      ansible.builtin.import_tasks:
+        file: "tasks/configure-postgresql.yml"
 
-        - name: "[PostgreSQL user setup] Create the user"
-          community.postgresql.postgresql_user:
-            login_host: "{{ postgres_hostname }}"
-            login_port: "{{ postgres_port }}"
-            login_user: "{{ postgres_admin_user}}"
-            login_password: "{{ postgres_admin_password }}"
-
-            name: "{{ lemmy_synapse_postgres_user }}"
-            password: "{{ lemmy_synapse_postgres_password }}"
-
-            state: present
-
-        - name: "[PostgreSQL user setup] Configure the user"
-          community.postgresql.postgresql_membership:
-            login_host: "{{ postgres_hostname }}"
-            login_port: "{{ postgres_port }}"
-            login_user: "{{ postgres_admin_user}}"
-            login_password: "{{ postgres_admin_password }}"
-
-            source_roles:
-              - pg_monitor
-            target_roles:
-              - "{{ lemmy_synapse_postgres_user }}"
-
-            state: present
-
-    - name: Populate lemmy-synapse configuration
-      block:
-        - name: "[lemmy-synapse configuration] postgres-exporter DATA_SOURCE_NAME"
-          ansible.builtin.lineinfile:
-            path: "{{ lemmy_synapse_installation_directory }}/postgres-exporter/postgres-exporter.conf"
-
-            regexp: "^PG_EXPORTER_DATA_SOURCE_NAME"
-            line: "PG_EXPORTER_DATA_SOURCE_NAME=postgresql://\
-              {{ lemmy_synapse_postgres_user }}:{{ lemmy_synapse_postgres_password }}\
-              @{{ postgres_service_name }}:{{ postgres_port }}/postgres?sslmode=disable"
-
-            insertafter: EOF
-            create: true
-            state: present
-
-        - name: "[lemmy-synapse configuration] lemmy-synapse LEMMY_SYNAPSE_NETWORK"
-          ansible.builtin.lineinfile:
-            path: "{{ lemmy_synapse_installation_directory }}/lemmy-synapse.conf"
-
-            regexp: "^LEMMY_SYNAPSE_NETWORK"
-            line: "LEMMY_SYNAPSE_NETWORK={{ lemmy_network }}"
-
-            insertafter: EOF
-            create: true
-            state: present
+    - name: Persist lemmy-synapse configuration
+      ansible.builtin.import_tasks:
+        file: "tasks/persist-configs.yml"
 
     - name: Restart lemmy-synapse cluster
-      block:
-        - name: "[Restart lemmy-synapse] Shut down the cluster"
-          ansible.builtin.command:
-            cmd: >-
-              {{ lemmy_synapse_installation_directory }}/lemmy-synapse down
-          register: _result
-          changed_when: _result is success
+      ansible.builtin.import_tasks:
+        file: "tasks/restart.yml"
 
-        - name: "[Restart lemmy-synapse] Start the cluster"
-          ansible.builtin.command:
-            cmd: >-
-              {{ lemmy_synapse_installation_directory }}/lemmy-synapse up
-          register: _result
-          changed_when: _result is success
+    - name: "Configure Grafana"
+      ansible.builtin.import_tasks:
+        file: "tasks/configure-grafana.yml"
 
-    - name: Setup Grafana
-      block:
-        - name: "[Setup Grafana] Add Prometheus datasource"
-          community.grafana.grafana_datasource:
-            grafana_url: "http://localhost:3000"
-            grafana_user: "admin"
-            grafana_password: "admin"
-            org_id: "1"
-            ds_type: "prometheus"
-            ds_url: "http://prometheus:9090"
-            name: "prometheus.lemmy-synapse"
-            uid: "be4998e0-8b84-4ac5-acfd-ec80a1ac6cba"
-            is_default: true
-            state: present
-          retries: 24
-          delay: 5
-          register: _result
-          until: _result is success
-
-        - name: Import stock postgres-exporter dashboard
-          block:
-            - name: "[Setup Grafana] Copy Host Stats dashboard to remote machine"
-              ansible.builtin.copy:
-                src: "{{ lemmy_synapse_dashboards_path }}/node-exporter-full.json"
-                dest: /tmp/node-exporter-full.json
-
-            - name: "[Setup Grafana] Import Host Stats dashboard"
-              ignore_errors: true
-              community.grafana.grafana_dashboard:
-                grafana_url: "http://localhost:3000"
-                grafana_user: "admin"
-                grafana_password: "admin"
-                org_id: "1"
-                path: /tmp/node-exporter-full.json
-                overwrite: true
-                state: present
-
-        - name: Import PostgreSQL Stats dashboard
-          block:
-            - name: "[Setup Grafana] Copy PostgreSQL Stats dashboard to remote machine"
-              ansible.builtin.copy:
-                src: "{{ lemmy_synapse_dashboards_path }}/postgresql-exporter.json"
-                dest: /tmp/postgresql-exporter.json
-
-            - name: "[Setup Grafana] Import PostgreSQL Stats dashboard"
-              ignore_errors: true
-              community.grafana.grafana_dashboard:
-                grafana_url: "http://localhost:3000"
-                grafana_user: "admin"
-                grafana_password: "admin"
-                org_id: "1"
-                path: /tmp/postgresql-exporter.json
-                overwrite: true
-                state: present
-
-        - name: Import Docker Stats dashboard
-          block:
-            - name: "[Setup Grafana] Copy Docker Stats dashboard to remote machine"
-              ansible.builtin.copy:
-                src: "{{ lemmy_synapse_dashboards_path }}/docker-cadvisor.json"
-                dest: /tmp/docker-cadvisor.json
-
-            - name: "[Setup Grafana] Import Docker Stats dashboard"
-              ignore_errors: true
-              community.grafana.grafana_dashboard:
-                grafana_url: "http://localhost:3000"
-                grafana_user: "admin"
-                grafana_password: "admin"
-                org_id: "1"
-                path: /tmp/docker-cadvisor.json
-                overwrite: true
-                state: present
-
-    - name: Post-installation information
+    - name: "Post-installation information"
       ansible.builtin.debug:
         msg: >-
           lemmy-synapse has been successfully installed on your server.
