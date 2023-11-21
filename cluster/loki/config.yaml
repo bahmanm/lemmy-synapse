@@ -1,0 +1,58 @@
+####################################################################################################
+# Copyright (c) 2023 Bahman Movaqar
+#
+# This file is part of lemmy-synapse.
+# lemmy-synapse is free software: you can redistribute it and/or modify it under the terms of the GNU
+# General Public License as published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# lemmy-synapse is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with lemmy-synapse.
+# If not, see <https://www.gnu.org/licenses/>.
+####################################################################################################
+
+---
+server:
+  http_listen_port: 3900
+
+memberlist:
+  join_members:
+    - loki:7946
+
+schema_config:
+  configs:
+    - from: 2023-11-01
+      store: tsdb
+      object_store: filesystem
+      schema: v12
+      index:
+        prefix: index_
+        period: 24h
+
+common:
+  path_prefix: /loki
+  replication_factor: 1
+  storage:
+    filesystem:
+      chunks_directory: "/var/lib/loki/chunks"
+      rules_directory: "/var/lib/loki/rules"
+  ring:
+    kvstore:
+      store: memberlist
+
+query_range:
+  parallelise_shardable_queries: true
+
+# querier:
+#   max_concurrent: 512
+
+frontend:
+  max_outstanding_per_tenant: 4096
+  compress_responses: true
+
+limits_config:
+  split_queries_by_interval: 24h
+  max_query_parallelism: 32

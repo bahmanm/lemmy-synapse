@@ -24,6 +24,8 @@ SHELL := /usr/bin/env -S bash -o pipefail
 name := lemmy-synapse
 root := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 confs := $(shell find $(root) -type f -name '*.conf')
+export UID := $(shell id -u)
+export GID := $(shell id -g)
 
 ####################################################################################################
 

@@ -87,12 +87,12 @@ services:
     ports:
       - "8080"
     volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker:/var/lib/docker:ro
+      - "/:/rootfs:ro"
+      - "/var/run:/var/run:rw"
+      - "/sys:/sys:ro"
+      - "/var/lib/docker:/var/lib/docker:ro"
     devices:
-      - /dev/kmsg:/dev/kmsg
+      - "/dev/kmsg:/dev/kmsg"
     privileged: true
     depends_on:
       - redis
@@ -100,10 +100,38 @@ services:
       - lemmy
     restart: always
 
+  loki:
+    image: grafana/loki:2.9.2
+    command:
+      - "-config.file=/etc/loki/config.yaml"
+      - "-target=all"
+    ports:
+      - "3900"
+      - "7946"
+      - "9095"
+    volumes:
+      - "./loki/config.yaml:/etc/loki/config.yaml"
+      - "loki-data:/var/lib/loki"
+    user: "${UID}:${GID}"
+    networks:
+      - lemmy
+    restart: always
+
+  promtail:
+    image: grafana/promtail:2.9.2
+    command:
+      - "-config.file=/etc/promtail/config.yaml"
+    volumes:
+      - "./promtail/config.yaml:/etc/promtail/config.yaml"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - lemmy
+
 volumes:
   prometheus-data:
   grafana-data:
   redis-data:
+  loki-data:
 
 networks:
   lemmy:
