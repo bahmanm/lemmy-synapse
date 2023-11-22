@@ -25,8 +25,6 @@ services:
       - "--storage.tsdb.path=/prometheus"
       - "--storage.tsdb.retention.time=30d"
       - "--log.level=debug"
-    ports:
-      - "9090"
     volumes:
       - "./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
       - "prometheus-data:/prometheus"
@@ -37,7 +35,7 @@ services:
   grafana:
     image: grafana/grafana:10.2.2
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     volumes:
       - "grafana-data:/var/lib/grafana"
     networks:
@@ -47,8 +45,6 @@ services:
   node-exporter:
     image: prom/node-exporter:v1.7.0
     command: "${NODE_EXPORTER_OPTIONS}"
-    ports:
-      - "9100"
     volumes:
       - "/:/host:ro,rslave"
     networks:
@@ -62,8 +58,6 @@ services:
       - "--log.level=debug"
     environment:
       - DATA_SOURCE_NAME=${PG_EXPORTER_DATA_SOURCE_NAME}
-    ports:
-      - "9187"
     networks:
       - lemmy
     restart: always
@@ -74,8 +68,6 @@ services:
       - "redis-server"
       - "--save 60 1"
       - "--loglevel warning"
-    ports:
-      - "6379"
     volumes:
       - "redis-data:/data"
     networks:
@@ -84,8 +76,6 @@ services:
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.2
-    ports:
-      - "8080"
     volumes:
       - "/:/rootfs:ro"
       - "/var/run:/var/run:rw"
@@ -105,10 +95,6 @@ services:
     command:
       - "-config.file=/etc/loki/config.yaml"
       - "-target=all"
-    ports:
-      - "3900"
-      - "7946"
-      - "9095"
     volumes:
       - "./loki/config.yaml:/etc/loki/config.yaml"
       - "loki-data:/var/lib/loki"
