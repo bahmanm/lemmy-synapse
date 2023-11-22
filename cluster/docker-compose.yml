@@ -124,6 +124,7 @@ services:
     volumes:
       - "./promtail/config.yaml:/etc/promtail/config.yaml"
       - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/var/log/journal:/var/log/journal"
     networks:
       - lemmy
 

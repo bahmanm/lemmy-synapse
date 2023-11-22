@@ -31,8 +31,21 @@ scrape_configs:
   - job_name: docker_scrape
     docker_sd_configs:
       - host: unix:///var/run/docker.sock
-        refresh_interval: 5s
+
     relabel_configs:
       - source_labels: ['__meta_docker_container_name']
         regex: '/(.*)'
         target_label: 'container'
+
+  - job_name: journal_scrape
+    journal:
+      json: false
+      max_age: 4h
+      path: /var/log/journal
+
+    relabel_configs:
+      - source_labels:
+          - "__journal__systemd_unit"
+        regex: '(.*)'
+        replacement: '\$1'
+        target_label: "unit"
