@@ -19,4 +19,3 @@
 collections:
   - name: community.postgresql
   - name: community.grafana
-  - name: community.docker
