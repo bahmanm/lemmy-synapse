@@ -105,12 +105,18 @@ services:
 
   promtail:
     image: grafana/promtail:2.9.2
+    entrypoint:
+      - "/bin/sh"
+      - "-c"
     command:
-      - "-config.file=/etc/promtail/config.yaml"
+      - >-
+        export HOSTNAME=$$(cat /etc/hostname)
+        && promtail -config.file=/etc/promtail/config.yaml -client.external-labels=hostname=$$HOSTNAME
     volumes:
       - "./promtail/config.yaml:/etc/promtail/config.yaml"
-      - "/var/run/docker.sock:/var/run/docker.sock"
-      - "/var/log/journal:/var/log/journal"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/var/log/journal:/var/log/journal:ro"
+      - "/etc/hostname:/etc/hostname:ro"
     networks:
       - lemmy
 
