@@ -25,7 +25,6 @@ positions:
 
 clients:
   - url: http://loki:3900/loki/api/v1/push
-    tenant_id: tenant1
 
 scrape_configs:
   - job_name: docker_scrape
