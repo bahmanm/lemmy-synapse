@@ -21,6 +21,23 @@
     that:
       - lemmy_synapse_dashboards_path
 
+- name: "configure-grafana ➤➤➤ Add Loki datasource"
+  community.grafana.grafana_datasource:
+    grafana_url: "http://localhost:3000"
+    grafana_user: "admin"
+    grafana_password: "admin"
+    org_id: "1"
+    ds_type: "loki"
+    ds_url: "http://loki:3900"
+    name: "loki.lemmy-synapse"
+    uid: "8e5f4152-891e-11ee-8d06-6fbf9f8e02ac"
+    is_default: false
+    state: present
+  retries: 24
+  delay: 5
+  register: _result
+  until: _result is success
+
 - name: "configure-grafana ➤➤➤ Add Prometheus datasource"
   community.grafana.grafana_datasource:
     grafana_url: "http://localhost:3000"
@@ -33,10 +50,6 @@
     uid: "be4998e0-8b84-4ac5-acfd-ec80a1ac6cba"
     is_default: true
     state: present
-  retries: 24
-  delay: 5
-  register: _result
-  until: _result is success
 
 - name: "Import host stats dashboard"
   block:
