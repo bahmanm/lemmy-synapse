@@ -46,6 +46,4 @@ scrape_configs:
     relabel_configs:
       - source_labels:
           - "__journal__systemd_unit"
-        regex: '(.*)'
-        replacement: '\$1'
         target_label: "unit"
