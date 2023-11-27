@@ -35,21 +35,18 @@ schema_config:
         period: 24h
 
 common:
-  path_prefix: /loki
+  path_prefix: "/loki"
   replication_factor: 1
   storage:
     filesystem:
-      chunks_directory: "/var/lib/loki/chunks"
-      rules_directory: "/var/lib/loki/rules"
+      chunks_directory: "/loki/chunks"
+      rules_directory: "/loki/rules"
   ring:
     kvstore:
       store: memberlist
 
 query_range:
   parallelise_shardable_queries: true
-
-# querier:
-#   max_concurrent: 512
 
 frontend:
   max_outstanding_per_tenant: 4096

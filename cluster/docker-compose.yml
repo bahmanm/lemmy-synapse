@@ -97,8 +97,7 @@ services:
       - "-target=all"
     volumes:
       - "./loki/config.yaml:/etc/loki/config.yaml"
-      - "loki-data:/var/lib/loki"
-    user: "${UID}:${GID}"
+      - "loki-data:/loki"
     networks:
       - lemmy
     restart: always
