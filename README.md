@@ -2,6 +2,9 @@
 
 A humble bundle of observability and monitoring for your Lemmy cluster.
 
+* [!lemmy_synapse@lemmy.ml](https://lemmy.ml/c/lemmy_synapse)
+* [#lemmy-synapse:matrix.org](https://matrix.to/#/#lemmy-synapse:matrix.org)
+
 # 1. What is this?
 
 If you're an admin, you know how important it is to be able to check the various details
