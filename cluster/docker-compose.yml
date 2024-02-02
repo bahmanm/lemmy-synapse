@@ -19,7 +19,7 @@ version: "3.8"
 
 services:
   prometheus:
-    image: prom/prometheus:v2.48.1
+    image: prom/prometheus:v2.49.1
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
@@ -35,7 +35,7 @@ services:
     restart: always
 
   grafana:
-    image: grafana/grafana:10.2.3
+    image: grafana/grafana:10.3.1
     ports:
       - "3000:3000"
     volumes:
@@ -69,7 +69,7 @@ services:
     restart: always
 
   redis:
-    image: redis:7.2.3
+    image: redis:7.2.4
     command:
       - "redis-server"
       - "--save 60 1"
