@@ -19,7 +19,7 @@ version: "3.8"
 
 services:
   prometheus:
-    image: prom/prometheus:v2.51.2
+    image: prom/prometheus:v2.54.0
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
@@ -35,7 +35,7 @@ services:
     restart: always
 
   grafana:
-    image: grafana/grafana:10.4.2
+    image: grafana/grafana:10.4.6
     ports:
       - "3000:3000"
     volumes:
@@ -45,7 +45,7 @@ services:
     restart: always
 
   node-exporter:
-    image: prom/node-exporter:v1.8.0
+    image: prom/node-exporter:v1.8.2
     command: "${NODE_EXPORTER_OPTIONS}"
     ports:
       - "9100"
@@ -69,7 +69,7 @@ services:
     restart: always
 
   redis:
-    image: redis:7.2.4
+    image: redis:7.4.0
     command:
       - "redis-server"
       - "--save 60 1"
@@ -83,7 +83,7 @@ services:
     restart: always
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    image: gcr.io/cadvisor/cadvisor:v0.50.0
     ports:
       - "8080"
     volumes:
